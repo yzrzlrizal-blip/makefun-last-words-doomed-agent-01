@@ -34,6 +34,13 @@ def main() -> int:
     with open(tmp, "w", encoding="utf-8", newline="\n") as f:
         f.write(text + "\n")
     os.replace(tmp, target)
+    # Verify the bytes on disk are exactly the line we meant to enter:
+    # a truncated or mangled write must fail loudly, not ship silently.
+    with open(target, "r", encoding="utf-8", newline="") as f:
+        written = f.read()
+    if written != text + "\n":
+        print("entry.txt mismatch: wrote %r" % written, file=sys.stderr)
+        return 1
     print(text)
     return 0
 
